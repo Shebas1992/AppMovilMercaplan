@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+
+# React Native
+.expo/
+.expo-shared/
+
+# Metro
+.metro-health-check*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+
+# Android
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/.cxx/
+
+# Android Studio
+*.iml
+.idea/
+.gradle/
+
+# iOS
+ios/build/
+ios/Pods/
+ios/DerivedData/
+
+# Xcode
+*.xcworkspace/xcuserdata/
+*.xcuserdatad/
+*.xcuserstate
+
+# CocoaPods
+Podfile.lock
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# Temporary files
+tmp/
+temp/
+
+# VSCode
+.vscode/
+
+# Coverage
+coverage/
+
+# Bundle
+*.bundle
