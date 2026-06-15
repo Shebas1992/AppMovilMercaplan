@@ -62,9 +62,8 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                     Accept: 'application/json',
                     'Content-Type': 'application/json'
                 }, body: JSON.stringify({
-                    idevento: auxidevento,
-                    idusuario: auxidusuario,
-                    fechareporte: fechareporte
+                    idtb_reporte: auxidevento,
+                    idusuario: auxidusuario
                 })
             });
 
@@ -98,8 +97,7 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
             const productoActualizado = {
                 ...selectProducto,
                 idtb_usuario: usuario.idusuario,
-                idtb_evento: idevento,
-                fechareporte: fechareporte
+                idtb_reporte: idevento
             };
 
             setSelectProducto(productoActualizado);
@@ -160,8 +158,7 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
             const productoActualizado = {
                 ...selectProducto,
                 idtb_usuario: usuario.idusuario,
-                idtb_evento: idevento,
-                fechareporte: fechareporte
+                idtb_reporte: idevento
             };
 
             setSelectProducto(productoActualizado);
@@ -272,7 +269,7 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                 <Header navigation={navigation} />
                 <Banner />
                 <Center my={2}>
-                    <Heading size={"xs"}>Reporte de la fecha: {fechareporte.substring(0, fechareporte.indexOf(" "))}</Heading>
+                    <Heading size={"xs"}>Productos</Heading>
                 </Center>
                 <Center my={5}>
                     <Input w={{

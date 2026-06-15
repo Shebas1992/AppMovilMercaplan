@@ -10,7 +10,8 @@ function Footer() {
                 
                 <HStack bg="gray.600" px="1" py="3" justifyContent="space-around" alignItems="center" w="100%" maxW="100%">
                     <HStack alignItems="center">
-                        <Icon as={FontAwesome6} name="copyright" size="xs" color="white" mr={2} />
+                        <Icon as={MaterialIcons
+                        } name="copyright" size="xs" color="white" mr={2} />
                         <Text color="white" fontSize={"2xs"}>
                             Mercaplan
                         </Text>

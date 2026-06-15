@@ -12,20 +12,12 @@ function Evento({ route, navigation }: { route: any, navigation: any }) {
 
     const { idevento } = route.params;
     const [loading, setLoading] = React.useState(false);
-    const [evento, setEvento] = React.useState({
-        logo: "",
-        nlineaproducto: null,
-        nombreempresa: null,
-        nlocal: null,
-        direccionlocal: null,
-        urllocal: "",
-        telefonolocal: null,
-        adminlocal: null
-
+    const [evento, setEvento] = React.useState<any>({
     });
     useEffect(() => {
+        //Se debe tener encuenta que se cambio la logica del programa por ende la id del evento es la iddereporte
         obtenerevento(idevento);
-
+        console.log(idevento);
     }, []);
 
     const llamar = () => {
@@ -63,17 +55,17 @@ function Evento({ route, navigation }: { route: any, navigation: any }) {
                 //Codigo para poner los eventos.
                 //setLsteventos(json.data);
                 setEvento(json.data);
-
+                console.log(json.data);
 
             }
 
         } catch (error) {
             console.log(error);
-             setTimeout(() => {
-                    Toast.show({
-                        description: "Error al cargar la información."
-                    });
-                }, 500);
+            setTimeout(() => {
+                Toast.show({
+                    description: "Error al cargar la información."
+                });
+            }, 500);
             setLoading(false);
         }
     };
@@ -89,18 +81,18 @@ function Evento({ route, navigation }: { route: any, navigation: any }) {
                     <HStack w={"100%"} flex={1}>
                         <Box flex={1}>
                             <Center>
-                                {evento.logo && (
+                                {evento.logomarca && (
                                     <Image
                                         size="2xl"
                                         resizeMode="contain"
                                         borderColor="red.700"
                                         source={{
-                                            uri: `data:image/jpeg;base64,${evento.logo}`
+                                            uri: `data:image/jpeg;base64,${evento.logomarca}`
                                         }}
                                         alt="Sin Logo de marca"
                                     />
                                 )}
-                                 <Heading size={"xs"} >{evento.nombreempresa}</Heading>
+                                <Heading size={"xs"} >{evento.nombrecomercial}</Heading>
                                 <Text>{evento.nlineaproducto}</Text>
                             </Center>
                         </Box>
@@ -128,7 +120,7 @@ function Evento({ route, navigation }: { route: any, navigation: any }) {
                                     color="coolGray.600"
                                     _dark={{ color: "warmGray.200" }}
                                 >
-                                    {evento.nlocal}
+                                    {evento.nombrelocal}
                                 </Text>
                             </HStack>
                         </VStack>
@@ -139,7 +131,7 @@ function Evento({ route, navigation }: { route: any, navigation: any }) {
                     <HStack ml={5} pt={1} alignItems="center">
                         <VStack w={"40%"}>
                             <HStack>
-                                <Icon as={<FontAwesome6 name="map-location-dot" />} size="sm" mr={2} />
+                                <Icon as={<Fontisto name="map" />} size="sm" mr={2} />
                                 <Text
                                     fontSize="sm"
                                     color="coolGray.600"
@@ -152,12 +144,14 @@ function Evento({ route, navigation }: { route: any, navigation: any }) {
                         <VStack w={"60%"} alignContent={"end"}>
                             <HStack>
                                 <Text
+                                    flex={1}
                                     fontSize="sm"
-                                    justifyContent={"flex-end"}
                                     color="coolGray.600"
                                     _dark={{ color: "warmGray.200" }}
+                                    numberOfLines={2}
+                                    ellipsizeMode="tail"
                                 >
-                                    {evento.direccionlocal}
+                                    {evento.direccion}
                                 </Text>
                             </HStack>
                         </VStack>
@@ -168,7 +162,7 @@ function Evento({ route, navigation }: { route: any, navigation: any }) {
                     <HStack ml={5} pt={1} alignItems="center">
                         <VStack w={"40%"}>
                             <HStack>
-                                <Icon as={<FontAwesome6 name="map-pin" />} size="sm" mr={2} />
+                                <Icon as={<Fontisto name="map" />} size="sm" mr={2} />
                                 <Text
                                     fontSize="sm"
                                     color="coolGray.600"
@@ -190,7 +184,7 @@ function Evento({ route, navigation }: { route: any, navigation: any }) {
                                         color: "indigo.500",
                                         fontWeight: "medium",
                                         fontSize: "sm"
-                                    }} href={evento.urllocal}>
+                                    }} href={evento.urlubicacion}>
                                         Abrir google maps
                                     </Link>
                                 </Text>
@@ -203,7 +197,7 @@ function Evento({ route, navigation }: { route: any, navigation: any }) {
                     <HStack ml={5} pt={1} alignItems="center">
                         <VStack w={"40%"}>
                             <HStack>
-                                <Icon as={<FontAwesome6 name="person" />} size="sm" mr={2} />
+                                <Icon as={<Fontisto name="person" />} size="sm" mr={2} />
                                 <Text
                                     fontSize="sm"
                                     color="coolGray.600"
@@ -220,42 +214,7 @@ function Evento({ route, navigation }: { route: any, navigation: any }) {
                                     color="coolGray.600"
                                     _dark={{ color: "warmGray.200" }}
                                 >
-                                    {evento.adminlocal}
-                                </Text>
-                            </HStack>
-                        </VStack>
-                    </HStack>
-                </VStack>
-                <Divider my={2} />
-                <VStack w={"100%"}>
-                    <HStack ml={5} pt={1} alignItems="center">
-                        <VStack w={"40%"}>
-                            <HStack>
-                                <Icon as={<FontAwesome6 name="phone" />} size="sm" mr={2} />
-                                <Text
-                                    fontSize="sm"
-                                    color="coolGray.600"
-                                    _dark={{ color: "warmGray.200" }}
-                                >
-                                    Teléfono:
-                                </Text>
-                            </HStack>
-                        </VStack>
-                        <VStack w={"60%"} alignContent={"end"}>
-                            <HStack>
-                                <Text
-                                    fontSize="sm"
-                                    justifyContent={"flex-end"}
-                                    color="coolGray.600"
-                                    _dark={{ color: "warmGray.200" }}
-                                >
-                                    <Link _text={{
-                                        color: "indigo.500",
-                                        fontWeight: "medium",
-                                        fontSize: "sm"
-                                    }} onPress={llamar}>
-                                        {evento.telefonolocal}
-                                    </Link>
+                                    {evento.nombre_admin}
                                 </Text>
                             </HStack>
                         </VStack>
@@ -263,7 +222,7 @@ function Evento({ route, navigation }: { route: any, navigation: any }) {
                 </VStack>
                 <Divider my={2} />
             </ScrollView>
-            <Menuevento navigation={navigation} auxid={1} auxidevento={idevento}/>
+            <Menuevento navigation={navigation} auxid={1} auxidevento={idevento} />
             <Footer />
         </Box>
     )

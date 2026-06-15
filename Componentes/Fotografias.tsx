@@ -144,7 +144,7 @@ function Fotografia({ route, navigation }: { route: any, navigation: any }) {
             const coords = await obtenerUbicacion();
             let datos = {
                 foto: img["assets"][0]["base64"] || '',
-                idtb_evento: idevento,
+                idtb_reporte: idevento,
                 idtb_usuario: usuario.idusuario,
                 tipofoto: tipoImg,
                 latitud: coords.latitude,
@@ -299,7 +299,7 @@ function Fotografia({ route, navigation }: { route: any, navigation: any }) {
                     Accept: 'application/json',
                     'Content-Type': 'application/json'
                 }, body: JSON.stringify({
-                    idtb_evento: idevento,
+                    idtb_reporte: idevento,
                     idtb_usuario: auxid
                 })
             });
@@ -417,7 +417,7 @@ function Fotografia({ route, navigation }: { route: any, navigation: any }) {
                         </Select>
                         <HStack space={2}>
                             <IconButton
-                                icon={<Icon as={FontAwesome6} name="camera" />}
+                                icon={<Icon as={MaterialIcons} name="camera" />}
                                 onPress={() => openCamera()}
                                 _icon={{ color: "blue.400", size: "md" }}
                             />
@@ -450,7 +450,7 @@ function Fotografia({ route, navigation }: { route: any, navigation: any }) {
                                 <Box h="200">
                                     <Center flex={1} w="100%">
                                         <HStack alignItems="center">
-                                            <Icon as={FontAwesome6} name="eye" size="md" mx={3} />
+                                            <Icon as={MaterialIcons} name="preview" size="md" mx={3} />
                                             <Heading size="xs" color="gray.400">
                                                 Vista previa
                                             </Heading>

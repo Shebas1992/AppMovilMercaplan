@@ -20,7 +20,7 @@ function Asistencia({ route, navigation }: { route: any, navigation: any }) {
     const [mostrarFirma, setMostrarFirma] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const [datos, setDatos] = React.useState({
-        idtb_evento: null,
+        idtb_reporte: null,
         idtb_usuario: null,
         idtb_tipo_asistencia: "",
         fechahora: null,
@@ -88,7 +88,7 @@ function Asistencia({ route, navigation }: { route: any, navigation: any }) {
         if (session) {
             const aux = JSON.parse(session);
             setUsuario(aux);
-            setDatos({ ...datos, idtb_usuario: aux.idusuario, idtb_evento: idevento });
+            setDatos({ ...datos, idtb_usuario: aux.idusuario, idtb_reporte: idevento });
         }
 
     };

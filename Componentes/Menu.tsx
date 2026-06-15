@@ -1,8 +1,9 @@
-import { Badge, Box, Button, CheckIcon, Flex, FormControl, Heading, HStack, Icon, IconButton, Image, Input, Modal, NativeBaseProvider, Pressable, ScrollView, Select, Spacer, Text, Toast, VStack } from "native-base";
+import { Badge, Box, Button, FlatList, Flex, FormControl, Heading, HStack, Icon, IconButton, Image, Input, Modal, NativeBaseProvider, Pressable, Spacer, Text, Toast, VStack } from "native-base";
 import React, { useEffect } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import Banner from "./Bannerpantalla";
+import SearchableSelect from "./SearchableSelect";
 import Fontisto from "react-native-vector-icons/Fontisto";
 import FontAwesome6 from "react-native-vector-icons/FontAwesome6";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -23,8 +24,9 @@ function Menu({ navigation }: { navigation: any }) {
     idusuario: null
   });
   const [reporte, setReporte] = React.useState<any>({
-    idtb_empresa: '',
-    idtb_lineaproducto: '',
+    idtb_empresa: null,
+    idtb_lineaproducto: null,
+    idtb_linea_producto: null,
     idtb_local: null,
     idtb_usuario: null,
   });
@@ -34,6 +36,7 @@ function Menu({ navigation }: { navigation: any }) {
   });
   const [loading, setLoading] = React.useState(false);
   const [lsteventos, setLsteventos] = React.useState([]);
+  const [lstReportes, setLstReportes] = React.useState<any>([]);
   const [refreshing, setRefreshing] = React.useState(false); //Variable para controlar el refres de la pantalla.
   const [empresas, setEmpresas] = React.useState([]);
   const [modalVisible, setModalVisible] = React.useState(false);
@@ -42,6 +45,21 @@ function Menu({ navigation }: { navigation: any }) {
     //listardatoscrearreporte();
 
   }, []);
+
+  const leerRespuestaJson = async (response: Response) => {
+    const respuestaTexto = await response.text();
+
+    try {
+      return JSON.parse(respuestaTexto);
+    } catch (error) {
+      console.log("Respuesta no JSON:", {
+        status: response.status,
+        url: response.url,
+        respuesta: respuestaTexto.substring(0, 300),
+      });
+      throw new Error("El servidor no devolvio JSON.");
+    }
+  };
 
   //Funcion para el refresh de la pantalla
   const onRefresh = React.useCallback(() => {
@@ -61,11 +79,43 @@ function Menu({ navigation }: { navigation: any }) {
       reporte.idtb_usuario = datos.idusuario;
       //listareventos(datos.idusuario);
       listardatoscrearreporte();
+      listareportes(datos.idusuario);
 
     }
 
   };
+  //Funcion para registrar un nuevo reporte.
+  const registrarreporte = async () => {
+    try {
+      console.log(reporte);
+      const response = await fetch(urlapi + 'evento/registrarreporte', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        }, body: JSON.stringify(reporte)
+      });
+      let respuesta = await response.json();
+      if (respuesta.data) {
+        Toast.show({
+          description: "Reporte registrado correctamente."
+        });
+        setModalVisible(false);
+        listareportes(usuario.idusuario);
+      } else {
+        Toast.show({
+          description: "Error al registrar el reporte."
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      Toast.show({
+        description: "Error en la conexión con el servidor."
+      });
+    }
+  };
 
+  //Funcion para obtener los datos necesarios para el formulario de registro de reportes.
   const listardatoscrearreporte = async () => {
     try {
       const response = await fetch(urlapi + 'evento/datosformevento', {
@@ -77,16 +127,17 @@ function Menu({ navigation }: { navigation: any }) {
       });
       let respuesta = response.json();
       setDatosform({empresas: (await respuesta).data.listadoempresas, locales: (await respuesta).data.listadolocales });
-      console.log(datosform.empresas);
-
+      
     } catch (error) {
       console.log(error);
     }
   }
-  //Obtener los eventos del usuario logueado.
-  const listareventos = async (auxidusuario: any) => {
+
+  //Obtener el listado de reportes del usuario logueado.
+  const listareportes = async (auxidusuario: any) => {
     try {
-      const response = await fetch(urlapi + 'evento/listareventosusuario', {
+      console.log(auxidusuario);
+      const response = await fetch(urlapi + 'evento/listarreportesxusuario', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -95,31 +146,24 @@ function Menu({ navigation }: { navigation: any }) {
           idtb_usuario: auxidusuario
         })
       });
+      const json = await leerRespuestaJson(response);
 
       if (!response.ok) {
-        throw new Error("Error en la conexión con el servidor.");
+        throw new Error(json.message || "Error al listar los reportes.");
       }
+      console.log(json.data);
 
-      const json = await response.json();
-
-      if (json.data == false) {
-        setLoading(false);
-        setTimeout(() => {
-          Toast.show({
-            description: "Sin eventos asignados."
-          });
-        }, 500);
-      } else {
-        setLoading(false);
-        //Codigo para poner los eventos.
-        setLsteventos(json.data);
-      }
-
+      setLstReportes(json.data);
     } catch (error) {
       console.log(error);
-      setLoading(false);
+      Toast.show({
+        description: "Error al listar los reportes."
+      });
     }
   };
+
+
+  //Componente para el formulario de registro de reportes.
 
   const Formularioregistro = ({ }) => {
 
@@ -132,34 +176,52 @@ function Menu({ navigation }: { navigation: any }) {
             <Modal.Body>
               <FormControl>
                 <FormControl.Label>Empresa</FormControl.Label>
-                <Select selectedValue={reporte.idtb_empresa} minWidth="200" accessibilityLabel="Choose Service" placeholder="Choose Service" _selectedItem={{
-                  bg: "teal.600",
-                  endIcon: <CheckIcon size="5"/>
-                }} mt={1} onValueChange={itemValue => {setReporte({ ...reporte, idtb_empresa: itemValue }); 
-                setEmpresaSelect(datosform.empresas.find((e: any) => e.idtb_empresa === itemValue)); console.log(empresaSelect);  } }>
-                  {datosform.empresas.map((element:any, index:any) => (
-                    <Select.Item key={index} label={element["nombrecomercial"]} value={element["idtb_empresa"]} />
-                  ))}
-                </Select>
+                <SearchableSelect
+                  value={reporte.idtb_empresa}
+                  items={datosform.empresas || []}
+                  labelKey="nombrecomercial"
+                  valueKey="idtb_empresa"
+                  placeholder="Seleccione empresa"
+                  searchPlaceholder="Buscar empresa..."
+                  onChange={(item) => {
+                    setReporte((prevReporte: any) => ({
+                      ...prevReporte,
+                      idtb_empresa: item.idtb_empresa,
+                      idtb_lineaproducto: null,
+                      idtb_linea_producto: null,
+                    }));
+                    setEmpresaSelect(item);
+                  }}
+                />
               </FormControl>
               <FormControl mt="3">
                 <FormControl.Label>Linea producto</FormControl.Label>
-                  <Select selectedValue={reporte.idtb_lineaproducto} minWidth="200" accessibilityLabel="Choose Service" placeholder="Choose Service" _selectedItem={{
-                  }} mt={1} onValueChange={itemValue => setReporte({ ...reporte, idtb_lineaproducto: itemValue })}>
-                  {(empresaSelect.lineasproductos || []).map((element: any, index: any) => (
-                    <Select.Item key={index} label={element["nlineaproducto"]} value={element["idtb_lineaproducto"]} />
-                  ))}
-                </Select>
-
+                <SearchableSelect
+                  value={reporte.idtb_lineaproducto}
+                  items={empresaSelect.lineasproductos || []}
+                  labelKey="nlineaproducto"
+                  valueKey="idtb_linea_producto"
+                  placeholder="Seleccione linea producto"
+                  searchPlaceholder="Buscar linea producto..."
+                  isDisabled={!reporte.idtb_empresa}
+                  onChange={(item) => setReporte((prevReporte: any) => ({
+                    ...prevReporte,
+                    idtb_lineaproducto: item.idtb_linea_producto,
+                    //idtb_linea_producto: item.idtb_linea_producto,
+                  }))}
+                />
               </FormControl>
               <FormControl mt="3">
                 <FormControl.Label>Local</FormControl.Label>
-                  <Select selectedValue={reporte.idtb_local} minWidth="200" accessibilityLabel="Choose Service" placeholder="Choose Service" _selectedItem={{
-                  }} mt={1} onValueChange={itemValue => setReporte({ ...reporte, idtb_local: itemValue })}>
-                  {(datosform.locales||[]).map((element: any, index: any) => (
-                    <Select.Item key={index} label={element["nombre"]} value={element["idtb_local"]} />
-                  ))}
-                </Select>
+                <SearchableSelect
+                  value={reporte.idtb_local}
+                  items={datosform.locales || []}
+                  labelKey="nombre"
+                  valueKey="idtb_local"
+                  placeholder="Seleccione local"
+                  searchPlaceholder="Buscar local..."
+                  onChange={(item) => setReporte((prevReporte: any) => ({ ...prevReporte, idtb_local: item.idtb_local }))}
+                />
               </FormControl>
             </Modal.Body>
             <Modal.Footer>
@@ -170,7 +232,7 @@ function Menu({ navigation }: { navigation: any }) {
                   Cancelar
                 </Button>
                 <Button onPress={() => {
-                  setModalVisible(false);
+                  registrarreporte();
                 }}>
                   Guardar
                 </Button>
@@ -182,16 +244,22 @@ function Menu({ navigation }: { navigation: any }) {
     );
   }
   //Componenete para mostrar los eventos.
-  const Cardevento = ({ idevento, razonsocial, lineaproducto, nombrelocal, direccionlocal, fechainicio, fechafin, horainicio, horafin, estado, logo }: { idevento: any, razonsocial: any, lineaproducto: any, nombrelocal: any, direccionlocal: any, fechainicio: any, fechafin: any, horainicio: any, horafin: any, estado: any, logo: any }) => {
-    const formatearFecha = (fecha: string) => {
-      const [anio, mes, dia] = fecha.split("T")[0].split("-");
+  const Cardevento = ({ idtb_reporte, razonsocial, lineaproducto, nombrelocal, direccionlocal, logo, fechareporte }: { idtb_reporte: any, razonsocial: any, lineaproducto: any, nombrelocal: any, direccionlocal: any, logo: any , fechareporte: any}) => {
+    const formatearFecha = (fecha: any) => {
+      const soloFecha = String(fecha || "").split("T")[0].replace(".", "-");
+      const [anio, mes, dia] = soloFecha.split("-");
+
+      if (!anio || !mes || !dia) {
+        return soloFecha;
+      }
+
       return `${dia}-${mes}-${anio}`;
     };
     return (
       <Box w="100%" px="3" bg={"white"}>
         <Pressable
           onPress={() => navigation.navigate("Menuevento", {
-            idevento: idevento
+            idevento: idtb_reporte
           })}
           rounded="8"
           overflow="hidden"
@@ -203,17 +271,6 @@ function Menu({ navigation }: { navigation: any }) {
           p="2"
         >
           <Box>
-            <HStack justifyContent={"flex-end"}>
-              <Badge
-                colorScheme="darkBlue"
-                _text={{ color: "white" }}
-                variant="solid"
-                rounded="4"
-              >
-                {estado}
-              </Badge>
-
-            </HStack>
             <HStack>
               <Image size={"xl"} resizeMode="contain" borderColor={'red.700'} source={{
                 uri: `data:image/jpg;base64,${logo}`
@@ -232,13 +289,29 @@ function Menu({ navigation }: { navigation: any }) {
                   </Text>
                 </HStack>
                 <HStack pt={1} alignItems="center">
-                  <Icon as={<FontAwesome6 name="map-location-dot" />} size="sm" mr={2} />
+                  <Icon as={<Fontisto name="map-marker-alt" />} size="sm" mr={2} />
                   <Text
+                    flex={1}
                     fontSize="sm"
                     color="coolGray.600"
                     _dark={{ color: "warmGray.200" }}
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
                   >
                     {direccionlocal}
+                  </Text>
+                </HStack>
+                <HStack pt={1} alignItems="center">
+                  <Icon as={<Fontisto name="date" />} size="sm" mr={2} />
+                  <Text
+                    flex={1}
+                    fontSize="sm"
+                    color="coolGray.600"
+                    _dark={{ color: "warmGray.200" }}
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                  >
+                    {formatearFecha(fechareporte)}
                   </Text>
                 </HStack>
               </VStack>
@@ -254,18 +327,25 @@ function Menu({ navigation }: { navigation: any }) {
   return (
     <Box flex={1}>
       <Header navigation={navigation} />
-      <ScrollView flex={1} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-        <Banner />
-        <HStack alignItems={"center"} justifyContent={"space-between"} ml={3} mr={3}>
-          <Heading size={"md"} mt={5} mb={3} ml={3}>Reportes realizados</Heading>
-          <IconButton icon={<Icon as={FontAwesome} name="plus-circle" size="md" color="gray.600" />} onPress={() => setModalVisible(true)} />
-        </HStack>
-
-        {lsteventos.map((element, index) => (
-          <Cardevento key={index} idevento={element["idtb_evento"]} razonsocial={element["nombrecomercial"]} lineaproducto={element["nlineaproducto"]} nombrelocal={element["nombre"]} direccionlocal={element["direccion"]} fechainicio={element["fechainicio"]} fechafin={element["fechafin"]} horainicio={element["horainicio"]} horafin={element["horafin"]} estado={element["estado"]} logo={element["logomarca"]} />
-        ))}
-        
-      </ScrollView>
+      <FlatList
+        data={lstReportes}
+        keyExtractor={(item: any, index: any) => String(item.idtb_evento || index)}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 80 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        ListHeaderComponent={
+          <>
+            <Banner />
+            <HStack alignItems={"center"} justifyContent={"space-between"} ml={3} mr={3}>
+              <Heading size={"md"} mt={5} mb={3} ml={3}>Reportes realizados</Heading>
+              <IconButton icon={<Icon as={FontAwesome} name="plus-circle" size="md" color="gray.600" />} onPress={() => setModalVisible(true)} />
+            </HStack>
+          </>
+        }
+        renderItem={({ item }: { item: any }) => (
+          <Cardevento idtb_reporte={item["idtb_reporte"]} razonsocial={item["nombrecomercial"]} lineaproducto={item["nlineaproducto"]} nombrelocal={item["nombrelocal"]} direccionlocal={item["direccion"]} logo={item["logomarca"]} fechareporte={item["fechareporte"]} />
+        )}
+      />
       <Formularioregistro />
       <Footer />
     </Box>
