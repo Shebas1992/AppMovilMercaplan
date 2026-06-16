@@ -4,7 +4,7 @@ import Header from "./Header";
 import Banner from "./Bannerpantalla";
 import Menuevento from "./Menuevento";
 import Footer from "./Footer";
-import FontAwesome6 from "react-native-vector-icons/FontAwesome6";
+import Fontisto from "react-native-vector-icons/Fontisto";
 import Geolocation from '@react-native-community/geolocation';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SignatureScreen from "react-native-signature-canvas";
@@ -238,7 +238,7 @@ function Asistencia({ route, navigation }: { route: any, navigation: any }) {
                                                 guardarasistencia();
                                             }
                                         }}
-                                        leftIcon={<Icon as={FontAwesome6} name="clock" size="sm" />}
+                                        leftIcon={<Icon as={Fontisto} name="clock" size="sm" />}
                                     >
                                         MARCAR
                                     </Button> : <HStack space={2} justifyContent="center">
