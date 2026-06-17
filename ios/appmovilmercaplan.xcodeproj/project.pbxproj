@@ -435,6 +435,7 @@
 			baseConfigurationReference = 5B7EB9410499542E8C5724F5 /* Pods-appmovilmercaplan-appmovilmercaplanTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = U5DXW7UR9T;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -453,7 +454,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/appmovilmercaplan.app/appmovilmercaplan";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/appmovilmercaplan.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/appmovilmercaplan";
 			};
 			name = Debug;
 		};
@@ -463,6 +464,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
+				DEVELOPMENT_TEAM = U5DXW7UR9T;
 				INFOPLIST_FILE = appmovilmercaplanTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -477,7 +479,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/appmovilmercaplan.app/appmovilmercaplan";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/appmovilmercaplan.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/appmovilmercaplan";
 			};
 			name = Release;
 		};
@@ -492,19 +494,20 @@
 				DEVELOPMENT_TEAM = U5DXW7UR9T;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = appmovilmercaplan/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MercaTrack;
+				INFOPLIST_KEY_CFBundleDisplayName = MERCATRACK;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 2.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = com.sbahamonde.mercaplan.app;
 				PRODUCT_NAME = appmovilmercaplan;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -522,19 +525,20 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = U5DXW7UR9T;
 				INFOPLIST_FILE = appmovilmercaplan/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MercaTrack;
+				INFOPLIST_KEY_CFBundleDisplayName = MERCATRACK;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 2.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = com.sbahamonde.mercaplan.app;
 				PRODUCT_NAME = appmovilmercaplan;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
