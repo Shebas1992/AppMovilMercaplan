@@ -85,8 +85,9 @@ function Login({ navigation }: { navigation: any }) {
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} >
                 <Center flex={1}>
                     <Box safeArea p="2" py="4" w="90%" maxW="85%">
+                        
                         <Image source={require('../Images/logomercaplan.jpeg')} alt="Logo Mercaplan" resizeMode="contain" />
-
+                        
                         <Heading textAlign={"center"} _dark={{
                             color: "warmGray.200"
                         }} color="coolGray.600" fontWeight="medium" size="xs">
@@ -116,7 +117,11 @@ function Login({ navigation }: { navigation: any }) {
                             </HStack> : <Button mt="2" colorScheme={"coolGray"} leftIcon={<Icon as={<MaterialIcons name="login" />} size="sm" />} onPress={() => ingresar()}>
                                 Ingresar
                             </Button>}
-                           
+                           <Heading textAlign={"center"} _dark={{
+                            color: "warmGray.200"
+                        }} color="coolGray.400" fontWeight="medium" size="xs">
+                            Plataforma de Trade Marketing
+                        </Heading>
                         </VStack>
                     </Box>
                 </Center>

@@ -79,8 +79,8 @@ android {
         applicationId "com.mercatrack.mercaplan"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 202606163
-        versionName "2026.06.16"
+        versionCode 202606252
+        versionName "2026.06.25"
     }
     signingConfigs {
         debug {

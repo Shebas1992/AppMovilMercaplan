@@ -32,13 +32,17 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Esta aplicación necesita acceso a la cámara para tomar fotos y videos.</string>
+	<string>Mercatrack utiliza la cámara para capturar fotografías como evidencia del registro de asistencia, visitas y actividades promocionales realizadas por el usuario en los puntos de venta.</string>
+
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Para verificar la llegada de la promotora al lugar.</string>
+	<string>Mercatrack utiliza tu ubicación para registrar y validar el lugar donde se realizan las asistencias, visitas y actividades promocionales en los puntos de venta.</string>
+
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Esta aplicación necesita acceso a la biblioteca de fotos para seleccionar imágenes y videos.</string>
-	<key>NsPhotoLibraryAddUsageDescription</key>
-	<string>Esta aplicación necesita permiso para agregar fotos a la biblioteca de fotos.</string>
+	<string>Mercatrack accede a tu biblioteca de fotos para que puedas seleccionar imágenes y adjuntarlas como evidencia de asistencias, visitas y actividades promocionales.</string>
+
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Mercatrack puede guardar fotografías en tu biblioteca cuando solicites descargar o conservar las evidencias generadas desde la aplicación.</string>
+	
 	<key>UIAppFonts</key>
 	<array>
 		<string>MaterialIcons.ttf</string>

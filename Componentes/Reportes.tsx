@@ -63,7 +63,6 @@ function Reportes({ route, navigation }: { route: any, navigation: any }) {
                 setEvento(json.data);
                 const auxdias = generarDias(json.data.fechainicio, json.data.fechafin);
                 setDias(auxdias);
-                console.log(dias);
 
             }
 

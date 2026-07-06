@@ -8,6 +8,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { urlapi } from "./configuracion";
+import DateTimePickerModal from "react-native-modal-datetime-picker"
 
 function Productos({ route, navigation }: { route: any, navigation: any }) {
     React.useEffect(() => {
@@ -20,7 +21,9 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
     const [modalVisible2, setModalVisible2] = React.useState(false);
     const [palabra, setPalabra] = React.useState('');
     const [loading, setLoading] = React.useState(false);
+    const [isDatePickerVisible, setDatePickerVisility] = React.useState(false)
     const [lstproductos, setLstproductos] = React.useState([]);
+    const [mostrarCalendario, setMostrarCalendario] = React.useState(false);
     const [usuario, setUsuario] = React.useState({
         nombres: null,
         apellidos: null,
@@ -41,9 +44,28 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
         idtb_producto: "",
         idtb_usuario: null,
         idtb_evento: "",
-        fechareporte: ""
+        fechareporte: "",
+        lotecaduca: "",
+        fechacaduca: "",
 
     });
+
+
+    const showDatePicker = () => {
+        setDatePickerVisility(true);
+    }
+
+    const hideDatePicker = () => {
+        setDatePickerVisility(false);
+    }
+
+    const handleConfirm = (date: Date) => {
+        setSelectProducto({
+            ...selectProducto,
+            fechacaduca: date.toLocaleDateString()
+    });
+    hideDatePicker();
+    }
 
     const verificarLogin = async () => {
         const session = await AsyncStorage.getItem("session");
@@ -162,7 +184,7 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
             };
 
             setSelectProducto(productoActualizado);
-            console.log(productoActualizado);
+            //console.log(productoActualizado);
             const response = await fetch(urlapi + 'usuario/ingresardatosventasproducto', {
                 method: 'POST',
                 headers: {
@@ -290,7 +312,10 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
             </Box>
 
             {/*Modal para realizar el registro de los datos iniciales del producto.*/}
-            <Modal isOpen={modalVisible} onClose={() => setModalVisible(false)} avoidKeyboard justifyContent="flex-start" top="5" size="lg">
+            <Modal isOpen={modalVisible} onClose={() => {
+                setModalVisible(false);
+                setMostrarCalendario(false);
+            }} avoidKeyboard justifyContent="flex-start" top="5" size="lg">
                 <Modal.Content>
                     <Modal.CloseButton />
                     <Modal.Header>{selectProducto.nproducto}</Modal.Header>
@@ -316,6 +341,32 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                                 inventarioinicial: e
                             })} keyboardType="number-pad" />
                         </FormControl>
+                        <FormControl mt="3">
+                            <FormControl.Label>Lote a caducar:</FormControl.Label>
+                            <Input placeholder="Lote a caducar" value={selectProducto.lotecaduca?.toString()} onChangeText={(e) => setSelectProducto({
+                                ...selectProducto,
+                                lotecaduca: e
+                            })}/>
+                        </FormControl>
+                        <FormControl mt="3">
+                            <FormControl.Label>Fecha de Lote:</FormControl.Label>
+                            <Pressable onPress={showDatePicker}>
+                                <Box pointerEvents="none">
+                                    <Input
+                                        placeholder="Fecha a caducar"
+                                        value={selectProducto.fechacaduca?.toString()}
+                                        isReadOnly
+                                        InputRightElement={<Icon as={MaterialIcons} name="calendar-today" size="sm" mr="3" color="muted.400" />}
+                                    />
+                                </Box>
+                            </Pressable>
+                                    <DateTimePickerModal 
+                                    isVisible={isDatePickerVisible}
+                                    mode="date"
+                                    locale="es-ES"
+                                    onConfirm={handleConfirm}
+                                    onCancel={hideDatePicker}/>
+                        </FormControl>
                     </Modal.Body>
                     <Modal.Footer>
                         <HStack w={"100%"} justifyContent={"space-around"}>
@@ -327,6 +378,7 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                             </Button>
                             <Button onPress={() => {
                                 setModalVisible(false);
+                                setMostrarCalendario(false);
                             }}>
                                 Cancelar
                             </Button>

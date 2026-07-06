@@ -87,7 +87,6 @@ function Menu({ navigation }: { navigation: any }) {
   //Funcion para registrar un nuevo reporte.
   const registrarreporte = async () => {
     try {
-      console.log(reporte);
       const response = await fetch(urlapi + 'evento/registrarreporte', {
         method: 'POST',
         headers: {
@@ -136,7 +135,6 @@ function Menu({ navigation }: { navigation: any }) {
   //Obtener el listado de reportes del usuario logueado.
   const listareportes = async (auxidusuario: any) => {
     try {
-      console.log(auxidusuario);
       const response = await fetch(urlapi + 'evento/listarreportesxusuario', {
         method: 'POST',
         headers: {
@@ -151,7 +149,6 @@ function Menu({ navigation }: { navigation: any }) {
       if (!response.ok) {
         throw new Error(json.message || "Error al listar los reportes.");
       }
-      console.log(json.data);
 
       setLstReportes(json.data);
     } catch (error) {

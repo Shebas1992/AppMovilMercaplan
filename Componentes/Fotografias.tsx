@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { PermissionsAndroid, Platform } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import RNFS from 'react-native-fs';
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 
 
 function Fotografia({ route, navigation }: { route: any, navigation: any }) {
@@ -225,6 +226,9 @@ function Fotografia({ route, navigation }: { route: any, navigation: any }) {
 
             // 💾 Guardar archivo
             await RNFS.writeFile(path, base64, 'base64');
+            await CameraRoll.save(`file://${path}`, {
+  type: 'photo',
+});
             setTimeout(() => {
                 Toast.show({
                     description: "Imagen guardada en descargas.",
