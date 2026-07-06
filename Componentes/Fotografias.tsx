@@ -206,32 +206,38 @@ function Fotografia({ route, navigation }: { route: any, navigation: any }) {
         try {
             const fileName = `foto_${Date.now()}.jpg`;
 
-            // 📍 Ruta según plataforma
-            const path =
-                Platform.OS === 'android'
-                    ? `${RNFS.DownloadDirectoryPath}/${fileName}`
-                    : `${RNFS.DocumentDirectoryPath}/${fileName}`;
-
-            // 🔐 Permiso Android
-            /*if (Platform.OS === 'android') {
+            if (Platform.OS === 'android' && Number(Platform.Version) <= 28) {
                 const granted = await PermissionsAndroid.request(
-                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                    {
+                        title: 'Permiso para guardar imagen',
+                        message: 'La app necesita guardar la imagen en la galería',
+                        buttonPositive: 'Aceptar',
+                        buttonNegative: 'Cancelar',
+                    }
                 );
-    
+
                 if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-                    console.log('Permiso denegado');
+                    Toast.show({
+                        description: "Permiso denegado para guardar la imagen.",
+                        bg: "danger.500"
+                    });
                     return;
                 }
-            }*/
+            }
 
-            // 💾 Guardar archivo
+            const path =
+                Platform.OS === 'android'
+                    ? `${RNFS.CachesDirectoryPath}/${fileName}`
+                    : `${RNFS.DocumentDirectoryPath}/${fileName}`;
+
             await RNFS.writeFile(path, base64, 'base64');
             await CameraRoll.save(`file://${path}`, {
-  type: 'photo',
-});
+                type: 'photo',
+            });
             setTimeout(() => {
                 Toast.show({
-                    description: "Imagen guardada en descargas.",
+                    description: "Imagen guardada en la galería.",
                     bg: "emerald.500"
                 });
             }, 500);
