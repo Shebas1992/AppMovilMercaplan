@@ -13,6 +13,7 @@ import Promocionales from "./Promocionalesevento";
 import PrevisualizacionProducto from "./PrevisualizacionProducto";
 import RegistroInfoInicial from "./RegistroInfoInicial";
 import RegistroVentas from "./RegistroVentas";
+import InformeAsistencia from "./InformeAsistencia";
 
 const Stack = createNativeStackNavigator();
 
@@ -40,6 +41,7 @@ function Navegacion({ logueado }: { logueado: any }) {
                 <Stack.Screen name="PrevisualizacionProducto" component={PrevisualizacionProducto} />
                 <Stack.Screen name="RegistroInfoInicial" component={RegistroInfoInicial} />
                 <Stack.Screen name="RegistroVentas" component={RegistroVentas} />
+                <Stack.Screen name="InformeAsistencia" component={InformeAsistencia} />
                 <Stack.Screen
                     name="PantallaFirmar"
                     component={PantallaFirmar}

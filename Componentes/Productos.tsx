@@ -11,12 +11,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { urlapi } from "./configuracion";
 
 function Productos({ route, navigation }: { route: any, navigation: any }) {
-    React.useEffect(() => {
+    const idevento = route?.params?.idevento ?? route?.params?.idtb_reporte ?? route?.params?.idreporte;
+    const fechareporte = route?.params?.fechareporte;
 
+    React.useEffect(() => {
         verificarLogin();
 
-    }, [])
-    const { idevento, fechareporte } = route.params;
+        const unsubscribe = navigation?.addListener?.("focus", () => {
+            verificarLogin();
+        });
+
+        return unsubscribe;
+    }, [navigation, idevento]);
     const [modalVisible, setModalVisible] = React.useState(false);
     const [modalVisible2, setModalVisible2] = React.useState(false);
     const [palabra, setPalabra] = React.useState('');
@@ -119,7 +125,25 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
         });
     }, [productosDisponibles, palabra]);
 
+    const normalizarProductos = (respuesta: any) => {
+        const datos = respuesta?.data ?? respuesta;
+
+        if (Array.isArray(datos)) return datos;
+        if (Array.isArray(datos?.data)) return datos.data;
+        if (Array.isArray(datos?.productos)) return datos.productos;
+        if (Array.isArray(datos?.items)) return datos.items;
+        if (Array.isArray(datos?.result)) return datos.result;
+
+        return [];
+    };
+
     const verificarLogin = async () => {
+        if (!idevento) {
+            setLoading(false);
+            Toast.show({ description: "No se encontró el evento activo." });
+            return;
+        }
+
         const session = await AsyncStorage.getItem("session");
         if (session) {
             const aux = JSON.parse(session);
@@ -157,8 +181,9 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                 }, 500);
                 setLoading(false);
             } else {
+                const productos = normalizarProductos(json);
                 setLoading(false);
-                setLstproductos(Array.isArray(json.data) ? json.data : (json.data?.data || []));
+                setLstproductos(productos);
             }
 
         } catch (error) {

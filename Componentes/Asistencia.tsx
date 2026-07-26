@@ -248,6 +248,15 @@ function Asistencia({ route, navigation }: { route: any, navigation: any }) {
                                         </Heading>
                                     </HStack>}
                             </Center>
+
+                            <Center py={2}>
+                                <Button
+                                    variant="outline"
+                                    onPress={() => navigation.navigate("InformeAsistencia", { idevento })}
+                                >
+                                    Ver informe de ventas
+                                </Button>
+                            </Center>
                         </Box>
 
                     </ScrollView>
