@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Center, Flex, FormControl, Heading, HStack, Icon, Input, Modal, Pressable, ScrollView, Spacer, Text, Toast, VStack } from "native-base";
+import { Badge, Box, Button, Center, Flex, FormControl, Heading, HStack, Icon, Input, Modal, Pressable, ScrollView, Spacer, Spinner, Text, Toast, VStack } from "native-base";
 import React from "react";
 import Header from "./Header";
 import Banner from "./Bannerpantalla";
@@ -78,6 +78,7 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
 
     const obtenerproductos = async (auxidevento: any, auxidusuario: any) => {
         try {
+            setLoading(true);
             const response = await fetch(urlapi + 'usuario/listarproductosevento', {
                 method: 'POST',
                 headers: {
@@ -102,6 +103,7 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                         description: "Error al cargar la información."
                     });
                 }, 500);
+                setLoading(false);
             } else {
                 setLoading(false);
                 setLstproductos(json.data);
@@ -299,6 +301,10 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                         md: "25%"
                     }} InputLeftElement={<Icon as={<Ionicons name="search-outline" />} size={5} ml="2" color="muted.400" />} placeholder="Buscar producto" onChangeText={e => setPalabra(e)} />
                 </Center>
+                {loading ? <Center flex={1}><Spinner size="lg" />
+                <Heading color="primary.500" fontSize="md">
+        Cargando productos...
+      </Heading></Center>:
                 <ScrollView flex={1} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }}>
                     {lstproductos.filter(function (item: any) {
                         return item.nproducto.toLowerCase().includes(palabra.toLowerCase()) || !palabra;
@@ -306,11 +312,11 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                         <Producto key={index} producto={producto} />
                     ))}
 
-                </ScrollView>
+                </ScrollView>}
                 <Menuevento navigation={navigation} auxid={4} auxidevento={idevento} />
                 <Footer />
             </Box>
-
+            
             {/*Modal para realizar el registro de los datos iniciales del producto.*/}
             <Modal isOpen={modalVisible} onClose={() => {
                 setModalVisible(false);
@@ -325,21 +331,21 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                             <Input placeholder="PVP" value={selectProducto.pvp?.toString()} onChangeText={(e) => setSelectProducto({
                                 ...selectProducto,
                                 pvp: e
-                            })} keyboardType="number-pad" />
+                            })} keyboardType="decimal-pad" />
                         </FormControl>
                         <FormControl mt="3">
                             <FormControl.Label>PVC</FormControl.Label>
                             <Input placeholder="PVC" value={selectProducto.pvc?.toString()} onChangeText={(e) => setSelectProducto({
                                 ...selectProducto,
                                 pvc: e
-                            })} keyboardType="number-pad" />
+                            })} keyboardType="decimal-pad" />
                         </FormControl>
                         <FormControl mt="3">
                             <FormControl.Label>Inventario inicial:</FormControl.Label>
                             <Input placeholder="Cantidad incial stock" value={selectProducto.inventarioinicial?.toString()} onChangeText={(e) => setSelectProducto({
                                 ...selectProducto,
                                 inventarioinicial: e
-                            })} keyboardType="number-pad" />
+                            })} keyboardType="decimal-pad" />
                         </FormControl>
                         <FormControl mt="3">
                             <FormControl.Label>Lote a caducar:</FormControl.Label>
@@ -404,7 +410,7 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                                     cantidad: e,
                                     ventas: (cantidad * pvp).toString()
                                 }))
-                            }} keyboardType="number-pad" />
+                            }} keyboardType="decimal-pad" />
                         </FormControl>
                         <FormControl mt="3">
                             <FormControl.Label>Reposición</FormControl.Label>
@@ -418,7 +424,7 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                                     reposicion: e,
                                     inventariofinal: (invinicial - cantidad + rep).toString()
                                 }))
-                            }} keyboardType="number-pad" />
+                            }} keyboardType="decimal-pad" />
                         </FormControl>
                         <FormControl mt="3">
                             <FormControl.Label>Inventario Final</FormControl.Label>

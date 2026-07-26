@@ -9,6 +9,7 @@ import Fotografia from "./Fotografias";
 import Productos from "./Productos";
 import PantallaFirmar from "./Pantallafirmar";
 import Reportes from "./Reportes";
+import Promocionales from "./Promocionalesevento";
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +33,7 @@ function Navegacion({ logueado }: { logueado: any }) {
                 <Stack.Screen name="Fotografiasevento" component={Fotografia} />
                 <Stack.Screen name="Productosevento" component={Productos} />
                 <Stack.Screen name="Reportes" component={Reportes} />
+                <Stack.Screen name="Promocionalesevento" component={Promocionales} />
                 <Stack.Screen
                     name="PantallaFirmar"
                     component={PantallaFirmar}

@@ -36,6 +36,11 @@ function Menuevento({ navigation, auxid, auxidevento }: { navigation: any, auxid
                     idevento: auxidevento
                 });
                 break;
+            case 5:
+                navigation.navigate("Promocionalesevento",{
+                    idevento: auxidevento
+                });
+                break;
         }
     }
     return (
@@ -71,6 +76,14 @@ function Menuevento({ navigation, auxid, auxidevento }: { navigation: any, auxid
                         <Icon mb="1" as={<MaterialIcons name={selected === 2 ? 'all-inbox' : 'all-inbox'} />} color="white" size="sm" />
                         <Text color="white" fontSize="12">
                             Productos
+                        </Text>
+                    </Center>
+                </Pressable>
+                <Pressable opacity={selected === 5 ? 1 : 0.6} py="2" flex={1} onPress={() => ira(5)}>
+                    <Center>
+                        <Icon mb="1" as={<MaterialIcons name={selected === 2 ? 'card-giftcard' : 'card-giftcard'} />} color="white" size="sm" />
+                        <Text color="white" fontSize="12">
+                            Promocion
                         </Text>
                     </Center>
                 </Pressable>
