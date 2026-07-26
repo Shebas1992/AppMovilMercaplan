@@ -4,11 +4,11 @@ import Header from "./Header";
 import Banner from "./Bannerpantalla";
 import Menuevento from "./Menuevento";
 import Footer from "./Footer";
+import ProductoModal from "./ProductoModal";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { urlapi } from "./configuracion";
-import DateTimePickerModal from "react-native-modal-datetime-picker"
 
 function Productos({ route, navigation }: { route: any, navigation: any }) {
     React.useEffect(() => {
@@ -21,6 +21,8 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
     const [modalVisible2, setModalVisible2] = React.useState(false);
     const [palabra, setPalabra] = React.useState('');
     const [loading, setLoading] = React.useState(false);
+    const [savingInicial, setSavingInicial] = React.useState(false);
+    const [savingVenta, setSavingVenta] = React.useState(false);
     const [isDatePickerVisible, setDatePickerVisility] = React.useState(false)
     const [lstproductos, setLstproductos] = React.useState([]);
     const [mostrarCalendario, setMostrarCalendario] = React.useState(false);
@@ -51,21 +53,71 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
     });
 
 
-    const showDatePicker = () => {
+    const showDatePicker = React.useCallback(() => {
         setDatePickerVisility(true);
-    }
+    }, []);
 
-    const hideDatePicker = () => {
+    const hideDatePicker = React.useCallback(() => {
         setDatePickerVisility(false);
-    }
+    }, []);
 
-    const handleConfirm = (date: Date) => {
-        setSelectProducto({
-            ...selectProducto,
+    const handleConfirm = React.useCallback((date: Date) => {
+        setSelectProducto(prev => ({
+            ...prev,
             fechacaduca: date.toLocaleDateString()
-    });
-    hideDatePicker();
-    }
+        }));
+        hideDatePicker();
+    }, [hideDatePicker]);
+
+    const abrirModalInicial = React.useCallback((producto: any) => {
+        setSelectProducto(producto);
+        navigation.navigate("RegistroInfoInicial", {
+            producto,
+            idevento,
+            usuario: usuario.idusuario ? usuario : null,
+            onRefresh: () => obtenerproductos(idevento, usuario.idusuario)
+        });
+    }, [idevento, navigation, usuario]);
+
+    const abrirModalVenta = React.useCallback((producto: any) => {
+        setSelectProducto(producto);
+        navigation.navigate("RegistroVentas", {
+            producto,
+            idevento,
+            usuario: usuario.idusuario ? usuario : null,
+            onRefresh: () => obtenerproductos(idevento, usuario.idusuario)
+        });
+    }, [idevento, navigation, usuario]);
+
+    const cerrarModalInicial = React.useCallback(() => {
+        setModalVisible(false);
+        setMostrarCalendario(false);
+    }, []);
+
+    const cerrarModalVenta = React.useCallback(() => {
+        setModalVisible2(false);
+    }, []);
+
+    const productosDisponibles = React.useMemo(() => {
+        if (Array.isArray(lstproductos)) {
+            return lstproductos;
+        }
+
+        if (Array.isArray((lstproductos as any)?.data)) {
+            return (lstproductos as any).data;
+        }
+
+        return [];
+    }, [lstproductos]);
+
+    const productosFiltrados = React.useMemo(() => {
+        const textoBusqueda = (palabra || '').toLowerCase();
+
+        return productosDisponibles.filter(function (item: any) {
+            const nombreProducto = item?.nproducto?.toString() || '';
+            return nombreProducto.toLowerCase().includes(textoBusqueda) || !textoBusqueda;
+        });
+    }, [productosDisponibles, palabra]);
 
     const verificarLogin = async () => {
         const session = await AsyncStorage.getItem("session");
@@ -106,8 +158,7 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                 setLoading(false);
             } else {
                 setLoading(false);
-                setLstproductos(json.data);
-
+                setLstproductos(Array.isArray(json.data) ? json.data : (json.data?.data || []));
             }
 
         } catch (error) {
@@ -117,7 +168,12 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
     };
 
     const ingresardatosinicialesproducto = async () => {
+        if (savingInicial) {
+            return;
+        }
+
         try {
+            setSavingInicial(true);
             const productoActualizado = {
                 ...selectProducto,
                 idtb_usuario: usuario.idusuario,
@@ -174,11 +230,18 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
         } catch (error) {
             console.log(error);
             setLoading(false);
+        } finally {
+            setSavingInicial(false);
         }
     };
 
     const ingresardatosventasproducto = async () => {
+        if (savingVenta) {
+            return;
+        }
+
         try {
+            setSavingVenta(true);
             const productoActualizado = {
                 ...selectProducto,
                 idtb_usuario: usuario.idusuario,
@@ -231,12 +294,15 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                 }
             }
         } catch (error) {
-
+            console.log(error);
+            setLoading(false);
+        } finally {
+            setSavingVenta(false);
         }
 
     }
 
-    const Producto = ({ producto }: { producto: any }) => {
+    const Producto = React.memo(function Producto({ producto, onOpenInicial, onOpenVenta }: { producto: any, onOpenInicial: (producto: any) => void, onOpenVenta: (producto: any) => void }) {
         return (
             <Box alignItems="center" my={2}>
                 <Pressable onPress={() => setSelectProducto(prev => ({
@@ -269,15 +335,15 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
 
 
                         <HStack w={"100%"} justifyContent={"space-between"} my={3}>
-                            <Button w={"50%"} leftIcon={<Icon as={MaterialIcons} name="inventory" size="sm" />} bgColor={"emerald.400"} onPress={() => {
-                                setModalVisible(!modalVisible);
-                                setSelectProducto(producto)
+                            <Button w={"50%"} leftIcon={<Icon as={MaterialIcons} name="inventory" size="sm" />} bgColor={"emerald.400"} onPress={(e: any) => {
+                                e?.stopPropagation?.();
+                                onOpenInicial(producto);
                             }}>
                                 Info Inicial
                             </Button>
-                            <Button w={"50%"} leftIcon={<Icon as={MaterialIcons} name="sell" size="sm" />} bgColor={"blueGray.400"} onPress={() => {
-                                setModalVisible2(!modalVisible2);
-                                setSelectProducto(producto)
+                            <Button w={"50%"} leftIcon={<Icon as={MaterialIcons} name="sell" size="sm" />} bgColor={"blueGray.400"} onPress={(e: any) => {
+                                e?.stopPropagation?.();
+                                onOpenVenta(producto);
                             }} isDisabled={producto.inventarioinicial == null && producto.pvc == null}>
                                 Datos venta
                             </Button>
@@ -286,7 +352,7 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                 </Pressable>
             </Box>
         )
-    }
+    });
     return (
         <Box flex={1}>
             <Box flex={1} bg={"white"}>
@@ -301,158 +367,61 @@ function Productos({ route, navigation }: { route: any, navigation: any }) {
                         md: "25%"
                     }} InputLeftElement={<Icon as={<Ionicons name="search-outline" />} size={5} ml="2" color="muted.400" />} placeholder="Buscar producto" onChangeText={e => setPalabra(e)} />
                 </Center>
+                <Center mb={3}>
+                    <Button size="sm" variant="outline" onPress={() => navigation.navigate("PrevisualizacionProducto", { productos: productosFiltrados })}>
+                        Ver resumen de ventas
+                    </Button>
+                </Center>
                 {loading ? <Center flex={1}><Spinner size="lg" />
                 <Heading color="primary.500" fontSize="md">
         Cargando productos...
       </Heading></Center>:
-                <ScrollView flex={1} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }}>
-                    {lstproductos.filter(function (item: any) {
-                        return item.nproducto.toLowerCase().includes(palabra.toLowerCase()) || !palabra;
-                    }).map((producto, index) => (
-                        <Producto key={index} producto={producto} />
-                    ))}
-
-                </ScrollView>}
+                productosFiltrados.length > 0 ? (
+                    <ScrollView flex={1} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }}>
+                        {productosFiltrados.map((producto: any, index: number) => (
+                            <Producto key={index} producto={producto} onOpenInicial={abrirModalInicial} onOpenVenta={abrirModalVenta} />
+                        ))}
+                    </ScrollView>
+                ) : (
+                    <Center flex={1} px="6">
+                        <Text color="muted.500">No hay productos para mostrar.</Text>
+                    </Center>
+                )}
                 <Menuevento navigation={navigation} auxid={4} auxidevento={idevento} />
                 <Footer />
             </Box>
             
-            {/*Modal para realizar el registro de los datos iniciales del producto.*/}
-            <Modal isOpen={modalVisible} onClose={() => {
-                setModalVisible(false);
-                setMostrarCalendario(false);
-            }} avoidKeyboard justifyContent="flex-start" top="5" size="lg">
-                <Modal.Content>
-                    <Modal.CloseButton />
-                    <Modal.Header>{selectProducto.nproducto}</Modal.Header>
-                    <Modal.Body>
-                        <FormControl mt="3">
-                            <FormControl.Label>PVP</FormControl.Label>
-                            <Input placeholder="PVP" value={selectProducto.pvp?.toString()} onChangeText={(e) => setSelectProducto({
-                                ...selectProducto,
-                                pvp: e
-                            })} keyboardType="decimal-pad" />
-                        </FormControl>
-                        <FormControl mt="3">
-                            <FormControl.Label>PVC</FormControl.Label>
-                            <Input placeholder="PVC" value={selectProducto.pvc?.toString()} onChangeText={(e) => setSelectProducto({
-                                ...selectProducto,
-                                pvc: e
-                            })} keyboardType="decimal-pad" />
-                        </FormControl>
-                        <FormControl mt="3">
-                            <FormControl.Label>Inventario inicial:</FormControl.Label>
-                            <Input placeholder="Cantidad incial stock" value={selectProducto.inventarioinicial?.toString()} onChangeText={(e) => setSelectProducto({
-                                ...selectProducto,
-                                inventarioinicial: e
-                            })} keyboardType="decimal-pad" />
-                        </FormControl>
-                        <FormControl mt="3">
-                            <FormControl.Label>Lote a caducar:</FormControl.Label>
-                            <Input placeholder="Lote a caducar" value={selectProducto.lotecaduca?.toString()} onChangeText={(e) => setSelectProducto({
-                                ...selectProducto,
-                                lotecaduca: e
-                            })}/>
-                        </FormControl>
-                        <FormControl mt="3">
-                            <FormControl.Label>Fecha de Lote:</FormControl.Label>
-                            <Pressable onPress={showDatePicker}>
-                                <Box pointerEvents="none">
-                                    <Input
-                                        placeholder="Fecha a caducar"
-                                        value={selectProducto.fechacaduca?.toString()}
-                                        isReadOnly
-                                        InputRightElement={<Icon as={MaterialIcons} name="calendar-today" size="sm" mr="3" color="muted.400" />}
-                                    />
-                                </Box>
-                            </Pressable>
-                                    <DateTimePickerModal 
-                                    isVisible={isDatePickerVisible}
-                                    mode="date"
-                                    locale="es-ES"
-                                    onConfirm={handleConfirm}
-                                    onCancel={hideDatePicker}/>
-                        </FormControl>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <HStack w={"100%"} justifyContent={"space-around"}>
-                            <Button onPress={() => {
-                                ingresardatosinicialesproducto();
-
-                            }} leftIcon={<Icon as={Ionicons} name="save" size="sm" />} >
-                                Guardar
-                            </Button>
-                            <Button onPress={() => {
-                                setModalVisible(false);
-                                setMostrarCalendario(false);
-                            }}>
-                                Cancelar
-                            </Button>
-                        </HStack>
-
-                    </Modal.Footer>
-                </Modal.Content>
-            </Modal>
-            {/*Modal para realizar el registro de los datos de venta.*/}
-            <Modal isOpen={modalVisible2} onClose={() => setModalVisible2(false)} avoidKeyboard justifyContent="flex-start" top="5" size="lg">
-                <Modal.Content>
-                    <Modal.CloseButton />
-                    <Modal.Header>{selectProducto.nproducto}</Modal.Header>
-                    <Modal.Body>
-                        <FormControl mt="3">
-                            <FormControl.Label>Cantidad Venta</FormControl.Label>
-                            <Input placeholder="Cantidad de venta" value={selectProducto.cantidad?.toString()} onChangeText={(e) => {
-                                const cantidad = Number(e) || 0;
-                                const pvp = Number(selectProducto.pvp) || 0;
-
-                                setSelectProducto(prev => ({
-                                    ...prev,
-                                    cantidad: e,
-                                    ventas: (cantidad * pvp).toString()
-                                }))
-                            }} keyboardType="decimal-pad" />
-                        </FormControl>
-                        <FormControl mt="3">
-                            <FormControl.Label>Reposición</FormControl.Label>
-                            <Input placeholder="Reposición" value={selectProducto.reposicion?.toString()} onChangeText={(e) => {
-                                const cantidad = Number(selectProducto.cantidad) || 0;
-                                const invinicial = Number(selectProducto.inventarioinicial) || 0;
-                                const rep = Number(e) || 0;
-
-                                setSelectProducto(prev => ({
-                                    ...prev,
-                                    reposicion: e,
-                                    inventariofinal: (invinicial - cantidad + rep).toString()
-                                }))
-                            }} keyboardType="decimal-pad" />
-                        </FormControl>
-                        <FormControl mt="3">
-                            <FormControl.Label>Inventario Final</FormControl.Label>
-                            <Input placeholder="Inventario final" value={selectProducto.inventariofinal?.toString()} keyboardType="number-pad" isReadOnly />
-                        </FormControl>
-                        <FormControl mt="3">
-                            <FormControl.Label>Ventas</FormControl.Label>
-                            <Input placeholder="Cantidad de ventas" isReadOnly value={`$ ${selectProducto.ventas?.toString() || '0'}`} keyboardType="number-pad" />
-                        </FormControl>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <HStack w={"100%"} justifyContent={"space-around"}>
-                            <Button onPress={() => {
-                                setModalVisible(false);
-                                ingresardatosventasproducto();
-                            }} leftIcon={<Icon as={Ionicons} name="save" size="sm" />}>
-                                Guardar
-                            </Button>
-                            <Button onPress={() => {
-                                setModalVisible2(false);
-                            }}>
-                                Cancelar
-                            </Button>
-                        </HStack>
-
-                    </Modal.Footer>
-                </Modal.Content>
-            </Modal>
+            <ProductoModal
+                isOpen={modalVisible}
+                onClose={cerrarModalInicial}
+                producto={selectProducto}
+                selectProducto={selectProducto}
+                setSelectProducto={setSelectProducto}
+                onSave={ingresardatosinicialesproducto}
+                saving={savingInicial}
+                mode="inicial"
+                isDatePickerVisible={isDatePickerVisible}
+                showDatePicker={showDatePicker}
+                hideDatePicker={hideDatePicker}
+                handleConfirm={handleConfirm}
+            />
+            <ProductoModal
+                isOpen={modalVisible2}
+                onClose={cerrarModalVenta}
+                producto={selectProducto}
+                selectProducto={selectProducto}
+                setSelectProducto={setSelectProducto}
+                onSave={() => {
+                    setModalVisible2(false);
+                    ingresardatosventasproducto();
+                }}
+                saving={savingVenta}
+                mode="venta"
+                isDatePickerVisible={isDatePickerVisible}
+                showDatePicker={showDatePicker}
+                hideDatePicker={hideDatePicker}
+                handleConfirm={handleConfirm}
+            />
         </Box>
 
 
